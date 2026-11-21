@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+button:not(:disabled) {
+    transition: opacity 150ms ease;
+}
+
+button:not(:disabled):hover {
+    opacity: 0.5;
+}
