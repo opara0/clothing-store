@@ -1,9 +1,11 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router'
 import { supabase } from '../../supabase'
+import Nav from './admin components/Nav'
 
-export default function Backroom() {
+export default function Backroom({ children }) {
     const [session, setSession] = useState(null)
     const [authLoading, setAuthLoading] = useState(true)
     const [adminLoading, setAdminLoading] = useState(false)
@@ -152,10 +154,12 @@ export default function Backroom() {
         )
     }
 
-    return <AdminDashboard onSignOut={signOut} error={authError} />
+    return <AdminDashboard onSignOut={signOut} error={authError}>{children}</AdminDashboard>
 }
 
-function AdminDashboard({ onSignOut, error }) {
+function AdminDashboard({ onSignOut, error, children }) {
+    const location = useLocation()
+    const isLightAdminPage = location.pathname.startsWith('/admin/orders')
     const [name, setname] = useState('')
     const [description, setdescription] = useState('')
     const [category, setcategory] = useState('')
@@ -227,6 +231,7 @@ function AdminDashboard({ onSignOut, error }) {
             setstock('')
             image.forEach(item => URL.revokeObjectURL(item.imageurl))
             setimage([])
+            window.dispatchEvent(new CustomEvent('products-updated'))
         } catch (error) {
             console.error('Failed to create product:', error)
             window.alert(error.message || 'Failed to create product')
@@ -234,40 +239,13 @@ function AdminDashboard({ onSignOut, error }) {
     }
     return (
         <>
-            <main className="flex min-h-screen w-full flex-col bg-[#181818] font-light text-white md:flex-row">
-                <aside className="flex w-full shrink-0 flex-col border-b border-slate-700 bg-[#111111] p-3 md:w-40 md:border-b-0 md:border-r">
-                    <h1 className="m-0 md:m-7">ADMIN</h1>
-                    <button type="button" onClick={onSignOut} className="mb-2 cursor-pointer text-left underline md:mb-3">
-                        Sign out
-                    </button>
-                    {error && <p role="alert" className="px-2 text-sm text-red-300">{error}</p>}
-                    <div className="mt-2 flex flex-row items-center gap-1 overflow-x-auto md:mt-5 md:flex-col md:items-start md:justify-center">
-                        <div className="focus:bg-[#121321] hover:brightness-50 hover:border-l m-1 flex w-full flex-row items-center gap-2 font-light">
-                            <svg aria-hidden="true" className="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M5 8h14l1 13H4L5 8Z" />
-                                <path d="M9 8V6a3 3 0 0 1 6 0v2" />
-                            </svg>
-                            Products
-                        </div>
-                        <div className="focus:bg-[#121321] hover:brightness-50 hover:border-l m-1 flex w-full flex-row items-center gap-2 font-light">
-                            <svg aria-hidden="true" className="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="m3 7 9-4 9 4v10l-9 4-9-4V7Z" />
-                                <path d="m3 7 9 4 9-4M12 11v10M7.5 5l9 4" />
-                            </svg>
-                            Orders
-                        </div>
-                        <hr className="w-4/5 bg-slate-500" />
-                        <div className="focus:bg-[#121321] hover:brightness-50 hover:border-l m-1 flex w-full flex-row items-center gap-2 font-light">
-                            <svg aria-hidden="true" className="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M14 4h6v6M20 4l-9 9" />
-                                <path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6" />
-                            </svg>
-                            View Store
-                        </div>
-
-                    </div>
-                </aside>
-                <section className="min-w-0 flex-1 bg-[#111111] p-4 sm:p-6 md:p-8">
+            <main className="flex min-h-screen w-full bg-[#181818] pb-16 font-light text-white md:pb-0">
+                <Nav onSignOut={onSignOut} error={error} />
+                <section className={(isLightAdminPage
+                    ? 'min-w-0 flex-1 bg-white text-slate-900'
+                    : 'min-w-0 flex-1 bg-[#111111] text-white') + (children ? '' : ' p-3 sm:p-5 lg:p-6')}>
+                    {children ? children : (
+                        <>
                     <h2 className="mb-2 text-3xl font-light sm:text-4xl">Create Product</h2>
                     <p className="font-extralight">Add a new product to your store</p>
                     <hr className="w-5/5 text-slate-500 my-3" />
@@ -340,7 +318,8 @@ function AdminDashboard({ onSignOut, error }) {
                             onClick={createproducts}
                             className="cursor-pointer rounded p-3 border bg-white text-black text-center">Publish Product</button>
                     </div>
-
+                        </>
+                    )}
                 </section>
             </main>
         </>

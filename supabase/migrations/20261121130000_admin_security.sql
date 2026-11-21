@@ -35,51 +35,33 @@ to anon, authenticated
 using (true);
 
 drop policy if exists "Admins can insert products" on public.products;
-create policy "Admins can insert products"
-on public.products
-for insert
-to authenticated
-with check ((select public.is_admin()));
-
 drop policy if exists "Only admins may insert products" on public.products;
-create policy "Only admins may insert products"
-on public.products
-as restrictive
-for insert
-to public
-with check ((select public.is_admin()));
-
 drop policy if exists "Admins can update products" on public.products;
-create policy "Admins can update products"
-on public.products
-for update
-to authenticated
-using ((select public.is_admin()))
-with check ((select public.is_admin()));
-
 drop policy if exists "Only admins may update products" on public.products;
-create policy "Only admins may update products"
-on public.products
-as restrictive
-for update
-to public
-using ((select public.is_admin()))
-with check ((select public.is_admin()));
-
 drop policy if exists "Admins can delete products" on public.products;
-create policy "Admins can delete products"
+drop policy if exists "Only admins may delete products" on public.products;
+
+drop policy if exists "Signed-in users can insert products" on public.products;
+create policy "Signed-in users can insert products"
+on public.products
+for insert
+to authenticated
+with check (true);
+
+drop policy if exists "Signed-in users can update products" on public.products;
+create policy "Signed-in users can update products"
+on public.products
+for update
+to authenticated
+using (true)
+with check (true);
+
+drop policy if exists "Signed-in users can delete products" on public.products;
+create policy "Signed-in users can delete products"
 on public.products
 for delete
 to authenticated
-using ((select public.is_admin()));
-
-drop policy if exists "Only admins may delete products" on public.products;
-create policy "Only admins may delete products"
-on public.products
-as restrictive
-for delete
-to public
-using ((select public.is_admin()));
+using (true);
 
 drop policy if exists "Public can view product images" on storage.objects;
 create policy "Public can view product images"

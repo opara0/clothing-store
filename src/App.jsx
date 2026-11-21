@@ -9,6 +9,8 @@ import { useEffect, useRef, useState } from 'react'
 import Checkout from './components/Checkout'
 import Product from './components/Product'
 import { getProducts } from '../data'
+import { supabase } from '../supabase'
+import BackroomApp from './BackroomApp'
 
 function animateProductToCart(sourceImage, cartButton, addButton) {
   if (!cartButton?.isConnected) return
@@ -140,6 +142,23 @@ function App() {
     }
 
     loadProducts()
+
+    const productsChannel = supabase
+      .channel('storefront-products')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'products' },
+        () => loadProducts(),
+      )
+      .subscribe()
+
+    const handleProductsUpdated = () => loadProducts()
+    window.addEventListener('products-updated', handleProductsUpdated)
+
+    return () => {
+      supabase.removeChannel(productsChannel)
+      window.removeEventListener('products-updated', handleProductsUpdated)
+    }
   }, [])
 
 
@@ -155,44 +174,54 @@ function App() {
 
   return (
     <>
-      <Header
-        cartButtonRef={cartButtonRef}
-        cartItemCount={cartid.length}
-        cartAnnouncement={cartAnnouncement}
-        setsearchterm={setsearchterm}
-        searchterm={searchterm}
-      />
       <Routes>
+        <Route path="/admin/*" element={<BackroomApp />} />
         <Route
-          path="/"
+          path="*"
           element={(
-            <Homepage
-              addcart={addcart}
-              products={products}
-              searchterm={searchterm}
-              searchProducts={searchProducts}
-              loading={loading}
-              loadError={loadError}
-            />
+            <>
+              <Header
+                cartButtonRef={cartButtonRef}
+                cartItemCount={cartid.length}
+                cartAnnouncement={cartAnnouncement}
+                setsearchterm={setsearchterm}
+                searchterm={searchterm}
+              />
+              <Routes>
+                <Route
+                  path="/"
+                  element={(
+                    <Homepage
+                      addcart={addcart}
+                      products={products}
+                      searchterm={searchterm}
+                      searchProducts={searchProducts}
+                      loading={loading}
+                      loadError={loadError}
+                    />
+                  )}
+                />
+                <Route
+                  path="/cart"
+                  element={(
+                    <Cart
+                      cartid={cartid}
+                      products={products}
+                      loading={loading}
+                      loadError={loadError}
+                      updateCartQuantity={updateCartQuantity}
+                      removeCartItem={removeCartItem}
+                    />
+                  )}
+                />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/product" element={<Product addcart={addcart} />} />
+              </Routes>
+            </>
           )}
         />
-        <Route
-          path='/cart'
-          element={(
-            <Cart
-              cartid={cartid}
-              products={products}
-              loading={loading}
-              loadError={loadError}
-              updateCartQuantity={updateCartQuantity}
-              removeCartItem={removeCartItem}
-            />
-          )}
-        />
-        <Route path='/checkout' element={<Checkout />} />
-        <Route path='/product' element={<Product addcart={addcart} />} />
-        <Route path='/admin' element={<Backroom></Backroom>}></Route>
-      </Routes></>
+      </Routes>
+    </>
   )
 }
 
