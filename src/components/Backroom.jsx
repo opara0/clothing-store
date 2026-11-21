@@ -234,14 +234,14 @@ function AdminDashboard({ onSignOut, error }) {
     }
     return (
         <>
-            <main className="flex min-h-screen w-full bg-[#181818] text-white font-light">
-                <aside className="flex w-32 shrink-0 flex-col border-r border-slate-700 bg-[#111111] p-3">
-                    <h1 className="m-7">ADMIN</h1>
-                    <button type="button" onClick={onSignOut} className="mb-3 cursor-pointer text-left underline">
+            <main className="flex min-h-screen w-full flex-col bg-[#181818] font-light text-white md:flex-row">
+                <aside className="flex w-full shrink-0 flex-col border-b border-slate-700 bg-[#111111] p-3 md:w-40 md:border-b-0 md:border-r">
+                    <h1 className="m-0 md:m-7">ADMIN</h1>
+                    <button type="button" onClick={onSignOut} className="mb-2 cursor-pointer text-left underline md:mb-3">
                         Sign out
                     </button>
                     {error && <p role="alert" className="px-2 text-sm text-red-300">{error}</p>}
-                    <div className="mt-5 flex flex-col items-start gap-1 justify-center">
+                    <div className="mt-2 flex flex-row items-center gap-1 overflow-x-auto md:mt-5 md:flex-col md:items-start md:justify-center">
                         <div className="focus:bg-[#121321] hover:brightness-50 hover:border-l m-1 flex w-full flex-row items-center gap-2 font-light">
                             <svg aria-hidden="true" className="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M5 8h14l1 13H4L5 8Z" />
@@ -267,20 +267,20 @@ function AdminDashboard({ onSignOut, error }) {
 
                     </div>
                 </aside>
-                <section className="min-w-0 flex-1 p-8 bg-[#111111]">
-                    <h2 className="text-4xl font-light mb-2">Create Product</h2>
+                <section className="min-w-0 flex-1 bg-[#111111] p-4 sm:p-6 md:p-8">
+                    <h2 className="mb-2 text-3xl font-light sm:text-4xl">Create Product</h2>
                     <p className="font-extralight">Add a new product to your store</p>
                     <hr className="w-5/5 text-slate-500 my-3" />
                     <section className="flex">
                         <div className="flex flex-col p-3  gap-2">
                             <h1>Product Images</h1>
                             <p>Upload multiple images</p>
-                            <input type='file' accept='image/*' onChange={getimages} className="cursor-pointer text-center h-42 w-108 rounded border-dotted border-slate-300 border bg-[#181818] flex flex-col justify-center">
+                            <input type='file' accept='image/*' onChange={getimages} className="h-42 w-full max-w-[27rem] cursor-pointer rounded border border-dotted border-slate-300 bg-[#181818] text-center">
 
                             </input>
                             <span>  Drag & Drop images here  or click to upload</span>
                             <p className="text-lg">max size of 50mb per image</p>
-                            <div className="flex flex-row gap-2">
+                            <div className="flex flex-row flex-wrap gap-2">
 
                                 {image.map((item, index) => (
                                     <div key={item.imageurl} className="relative size-24 shrink-0">
@@ -311,27 +311,27 @@ function AdminDashboard({ onSignOut, error }) {
 
                             value={name}
                             onChange={(e) => setname(e.target.value)}
-                            className="bg-[#181818] rounded w-5/5 p-2" type='text' placeholder='e.g classic blazer'></input>
+                            className="w-full max-w-2xl rounded bg-[#181818] p-2" type='text' placeholder='e.g classic blazer'></input>
                         <p>Description</p>
                         <input
                             value={description}
                             onChange={(e) => setdescription(e.target.value)}
-                            className="bg-[#181818] rounded w-5/5 h-10 p-2" type='text' placeholder='describe the product '></input>
+                            className="h-10 w-full max-w-2xl rounded bg-[#181818] p-2" type='text' placeholder='describe the product '></input>
                         <p>Category</p>
                         <input
                             value={category}
                             onChange={(e) => setcategory(e.target.value)}
-                            className="bg-[#181818] rounded w-3/5 p-2" type='text' placeholder='select category'></input>
+                            className="w-full max-w-sm rounded bg-[#181818] p-2" type='text' placeholder='select category'></input>
                         <p>Price</p>
                         <input
                             value={price}
                             onChange={(e) => setprice(e.target.value)}
-                            className="bg-[#181818] rounded w-3/5 p-2" type='number' placeholder='e.g 24000'></input>
+                            className="w-full max-w-sm rounded bg-[#181818] p-2" type='number' placeholder='e.g 24000'></input>
                         <p>Stock Quantity</p>
                         <input
                             value={stock}
                             onChange={(e) => setstock(e.target.value)}
-                            className="bg-[#181818] rounded w-3/5 p-2" type='number' placeholder='e.g 10'></input>
+                            className="w-full max-w-sm rounded bg-[#181818] p-2" type='number' placeholder='e.g 10'></input>
                     </section>
                     <hr className="w-5/5 text-slate-500 my-3 flex flex-row  " />
                     <div className="flex justify-end gap-2">

@@ -9,18 +9,18 @@ export default function Product({ addcart }) {
     const imageurl = getProductImageUrl(product.image_url)
     return (
         <>
-            <section className="grid max-h-screen gap-10  place-items-center p-10">
+            <section className="grid place-items-center gap-6 p-4 sm:gap-10 sm:p-6 md:p-10">
 
 
-                <div className="flex gap-10">
+                <div className="flex w-full max-w-6xl flex-col gap-6 md:flex-row md:gap-10">
                     <img
                         src={imageurl}
                         alt="Product"
-                        className="w-8/15 h-84 rounded"
+                        className="h-72 w-full rounded object-contain sm:h-96 md:h-[32rem] md:w-1/2"
                     />
 
 
-                    <div className="flex flex-col justify-between p-4 w-4/4 border ">
+                    <div className="flex w-full min-w-0 flex-col justify-between gap-4 border p-4 md:w-1/2">
                         <h1 className="text-3xl">{product.name}</h1>
 
                         <p>{product.category}</p>

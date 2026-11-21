@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
+
+const processedImageCache = new Map()
 
 
 export function getProductImageUrl(value) {
@@ -150,49 +152,49 @@ function removeUniformBackground(image) {
 }
 
 function ProductImage({ src, alt }) {
-    const [imageSrc, setImageSrc] = useState(src)
+    const [imageSrc, setImageSrc] = useState(() => processedImageCache.get(src) || src)
+    const active = useRef(true)
 
     useEffect(() => {
-        let active = true
-        let processedUrl = ''
-
-        const image = new Image()
-        try {
-            if (new URL(src, window.location.href).origin !== window.location.origin) {
-                image.crossOrigin = 'anonymous'
-            }
-        } catch (error) {
-            console.error('Could not prepare product image for background removal:', error)
-            return undefined
-        }
-
-        image.onload = async () => {
-            try {
-                const result = await removeUniformBackground(image)
-                if (!active) {
-                    if (result) URL.revokeObjectURL(result)
-                    return
-                }
-                if (result) {
-                    processedUrl = result
-                    setImageSrc(result)
-                }
-            } catch (error) {
-                console.error('Could not remove the product image background:', error)
-            }
-        }
-        image.onerror = () => {
-            console.error('Could not load product image for background removal:', src)
-        }
-        image.src = src
-
+        active.current = true
         return () => {
-            active = false
-            if (processedUrl) URL.revokeObjectURL(processedUrl)
+            active.current = false
         }
     }, [src])
 
-    return <img src={imageSrc} alt={alt} className="block h-auto w-full object-contain" />
+    let crossOrigin
+    try {
+        if (new URL(src, window.location.href).origin !== window.location.origin) {
+            crossOrigin = 'anonymous'
+        }
+    } catch (error) {
+        console.error('Could not prepare product image for background removal:', error)
+    }
+
+    async function processImage(event) {
+        if (imageSrc !== src || processedImageCache.has(src)) return
+
+        try {
+            const result = await removeUniformBackground(event.currentTarget)
+            processedImageCache.set(src, result)
+            if (active.current && result) setImageSrc(result)
+        } catch (error) {
+            console.error('Could not remove the product image background:', error)
+        }
+    }
+
+    return (
+        <img
+            crossOrigin={crossOrigin}
+            src={imageSrc}
+            alt={alt}
+            loading="lazy"
+            decoding="async"
+            onLoad={processImage}
+            onError={() => console.error('Could not load product image:', src)}
+            className="block h-auto w-full object-contain"
+        />
+    )
 }
 
 export default function Homepage({
@@ -272,20 +274,25 @@ export default function Homepage({
                                             />
                                         </div>
                                     )}
-                                    <div className="flex flex-row justify-between items-center">
-                                        <p className="mt-2 text-xs uppercase">{product.name}</p>
+                                    <div className="mt-2 grid min-h-[4.25rem] grid-rows-[2rem_auto] justify-items-center gap-1">
+                                        <p className="line-clamp-2 w-full text-center text-xs uppercase leading-4">{product.name}</p>
 
-                                        <button
-                                            type="button"
-                                            onDoubleClick={(event) => event.stopPropagation()}
-                                            onClick={(event) => addcart(
-                                                product.id,
-                                                event.currentTarget.closest('article')?.querySelector('img'),
-                                                product.name,
-                                                event.currentTarget,
-                                            )}
-                                            className='w-10 cursor-pointer border text-xs font-light text-black'>ADD</button>
-                                        <p className='mt-2 text-xs uppercase'>₦{product.price}</p>
+                                        <div className="flex items-center justify-center gap-3">
+                                            <button
+                                                type="button"
+                                                onDoubleClick={(event) => event.stopPropagation()}
+                                                onClick={(event) => addcart(
+                                                    product.id,
+                                                    event.currentTarget.closest('article')?.querySelector('img'),
+                                                    product.name,
+                                                    event.currentTarget,
+                                                )}
+                                                className="min-w-12 cursor-pointer border px-2 text-xs font-light text-black"
+                                            >
+                                                ADD
+                                            </button>
+                                            <p className="whitespace-nowrap text-xs uppercase">₦{product.price}</p>
+                                        </div>
                                     </div>
                                 </article>
                             ))}

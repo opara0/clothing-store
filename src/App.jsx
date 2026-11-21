@@ -122,6 +122,10 @@ function App() {
     })
   }
 
+  function removeCartItem(id) {
+    setcartid(ids => ids.filter((cartId) => cartId !== id))
+  }
+
   useEffect(() => {
     async function loadProducts() {
       try {
@@ -174,7 +178,16 @@ function App() {
         />
         <Route
           path='/cart'
-          element={<Cart cartid={cartid} updateCartQuantity={updateCartQuantity} />}
+          element={(
+            <Cart
+              cartid={cartid}
+              products={products}
+              loading={loading}
+              loadError={loadError}
+              updateCartQuantity={updateCartQuantity}
+              removeCartItem={removeCartItem}
+            />
+          )}
         />
         <Route path='/checkout' element={<Checkout />} />
         <Route path='/product' element={<Product addcart={addcart} />} />

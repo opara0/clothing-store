@@ -1,13 +1,21 @@
 import { supabase } from './supabase'
 
-export async function getProducts() {
-    const { data, error } = await supabase
-        .from('products')
-        .select('*')
+let productsRequest
 
-    if (error) {
-        throw error
+export async function getProducts() {
+    if (!productsRequest) {
+        productsRequest = supabase
+            .from('products')
+            .select('id, name, category, price, stock, description, image_url')
+            .then(({ data, error }) => {
+                if (error) throw error
+                return data
+            })
+            .catch((error) => {
+                productsRequest = undefined
+                throw error
+            })
     }
 
-    return data
+    return productsRequest
 }

@@ -1,28 +1,19 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faShieldHalved, faTruckFast, faTrashCan } from '@fortawesome/free-solid-svg-icons'
-import { useEffect, useState } from 'react'
-import { getProducts } from '../../data'
 import { getProductImageUrl } from './Homepage'
 import { useNavigate } from 'react-router'
 
-export default function Cart({ cartid, updateCartQuantity }) {
+export default function Cart({
+    cartid,
+    products,
+    loading,
+    loadError,
+    updateCartQuantity,
+    removeCartItem,
+}) {
     const navigate = useNavigate()
-    const [products, setProducts] = useState([])
     const productcount = cartid.length
 
-    useEffect(() => {
-        async function getcart() {
-            try {
-                const data = await getProducts()
-                setProducts(data)
-            } catch (error) {
-                alert(error)
-
-            }
-        }
-
-        getcart()
-    }, [])
     const product = products
         .filter((item) => cartid.includes(item.id))
         .map((item) => {
@@ -39,52 +30,64 @@ export default function Cart({ cartid, updateCartQuantity }) {
     )
 
     return (
-        <main className="p-3 text-slate-700">
-            <h1>Your Cart <span className="font-light">({productcount} items)</span></h1>
-            <main className="flex justify-between gap-3 text-white">
-                <section className="flex flex-col justify-between gap-2 w-2/4">
-                    {product.map((product) => {
+        <main className="mx-auto w-full max-w-7xl p-3 text-slate-700 sm:p-5">
+            <h1 className="mb-4 text-xl sm:text-2xl">Your Cart <span className="font-light">({productcount} items)</span></h1>
+            <section className="flex flex-col gap-5 text-white lg:flex-row lg:items-start">
+                <section className="flex w-full flex-col gap-2 lg:w-3/5">
+                    {loading && <p role="status">Loading cart...</p>}
+                    {loadError && <p role="alert">{loadError}</p>}
+                    {!loading && !loadError && product.length === 0 && (
+                        <p>Your cart is empty.</p>
+                    )}
+                    {!loading && !loadError && product.map((product) => {
                         const quantity = cartid.filter(id => id === product.id).length
                         return (
                             <div
                                 key={product.id}
-                                className="flex w-full items-center justify-between gap-4 rounded-2xl bg-[#181818] p-3"
+                                className="flex w-full flex-col gap-3 rounded-2xl bg-[#181818] p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                             >
-                                <div className="flex items-center gap-2">
-                                    <img src={product.imageUrl} className="size-24 rounded" alt={product.name} />
-                                    <div className="flex flex-col justify-around gap-3 text-sm ">
+                                <div className="flex min-w-0 items-center gap-2">
+                                    <img src={product.imageUrl} className="size-20 shrink-0 rounded sm:size-24" alt={product.name} />
+                                    <div className="flex min-w-0 flex-col justify-around gap-2 text-sm sm:gap-3">
                                         <h2>{product.name}</h2>
                                         <p>₦{product.price}</p>
                                         <h3>Quantity: {quantity}</h3>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between gap-2 rounded-4xl border p-1">
+                                <div className="flex w-full items-center gap-1 sm:w-auto">
+                                    <div className="flex flex-1 items-center justify-between gap-2 rounded-4xl border p-1 sm:flex-none">
+                                        <button
+                                            type="button"
+                                            aria-label={`Decrease ${product.name} quantity`}
+                                            onClick={() => updateCartQuantity(product.id, -1)}
+                                            className="cursor-pointer px-2"
+                                        >
+                                            -
+                                        </button>
+                                        <span>{quantity}</span>
+                                        <button
+                                            type="button"
+                                            aria-label={`Increase ${product.name} quantity`}
+                                            onClick={() => updateCartQuantity(product.id, 1)}
+                                            className="cursor-pointer px-2"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
                                     <button
                                         type="button"
-                                        aria-label={`Decrease ${product.name} quantity`}
-                                        onClick={() => updateCartQuantity(product.id, -1)}
-                                        className="cursor-pointer px-2"
+                                        aria-label={`Remove ${product.name} from cart`}
+                                        onClick={() => removeCartItem(product.id)}
+                                        className="flex flex-1 cursor-pointer items-center justify-center p-2 sm:flex-none"
                                     >
-                                        -
+                                        <FontAwesomeIcon icon={faTrashCan} className="text-white" />
                                     </button>
-                                    <span>{quantity}</span>
-                                    <button
-                                        type="button"
-                                        aria-label={`Increase ${product.name} quantity`}
-                                        onClick={() => updateCartQuantity(product.id, 1)}
-                                        className="cursor-pointer px-2"
-                                    >
-                                        +
-                                    </button>
-                                </div>
-                                <div>
-                                    <FontAwesomeIcon icon={faTrashCan} className="text-white" />
                                 </div>
                             </div>
                         )
                     })}
                 </section>
-                <section className="flex w-4/9 flex-col items-center justify-between rounded-2xl bg-[#181818] p-5 text-white">
+                <section className="flex w-full flex-col gap-4 rounded-2xl bg-[#181818] p-4 text-white sm:p-5 lg:w-2/5">
                     <h2 className="mb-3">Order Summary</h2>
                     <div className="flex w-full flex-row justify-between text-sm font-light">
                         <p>Subtotal ({productcount} items)</p>
@@ -129,7 +132,7 @@ export default function Cart({ cartid, updateCartQuantity }) {
                         </div>
                     </div>
                 </section>
-            </main>
+            </section>
         </main>
     )
 }
